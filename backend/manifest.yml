@@ -1,0 +1,90 @@
+name: RecipeHub
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - name
+      - name: email
+        type: email
+      - name: role
+        type: choice
+        options:
+          values: [admin, user]
+        default: user
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: restricted
+          allow: User
+          condition: self
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: admin
+      signup:
+        - access: public
+
+  Recipe:
+    properties:
+      - name: title
+        type: string
+        validations:
+          - { rule: required }
+      - name: description
+        type: text
+      - name: ingredients
+        type: text
+        helpText: 'List each ingredient on a new line.'
+      - name: instructions
+        type: richText
+      - name: prepTime
+        type: number
+        helpText: 'Preparation time in minutes.'
+      - name: cookTime
+        type: number
+        helpText: 'Cooking time in minutes.'
+      - name: difficulty
+        type: choice
+        options:
+          values: [Easy, Medium, Hard]
+        default: Medium
+      - name: photo
+        type: image
+        options:
+          sizes:
+            thumbnail:
+              width: 400
+              height: 300
+            large:
+              width: 1024
+              height: 768
+    belongsTo:
+      - name: owner
+        entity: User
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: public
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: restricted
+          allow: User
+          condition: self
+
+
+# Health check endpoint for connection testing
+endpoints:
+  health:
+    path: /api/health
+    method: GET
+    policies: []
+    handler: healthCheck
